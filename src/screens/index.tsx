@@ -258,7 +258,7 @@ setLatexPosition({
                 />
             </div>
             <div className='flex justify-center'>
-                <h1>Result</h1>
+                <h1 className='text-2xl font-bold text-black'>Result</h1>
             </div>
             {latexExpression && latexExpression.map((latex, index) => (
                 <Draggable
