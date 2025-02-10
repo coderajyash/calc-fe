@@ -73,15 +73,14 @@ export default function Home() {
         const canvas = canvasRef.current;
         
         const resizeCanvas = () => {
+            const canvas = canvasRef.current;
             if (canvas) {
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
-                    ctx.lineCap = 'round';
-                    ctx.lineWidth = 3;
-                    ctx.fillStyle = 'black'; // Background color
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'black'; // Set background color
+                    ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill entire canvas
                 }
             }
         };
@@ -114,7 +113,9 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear content
+                ctx.fillStyle = 'black'; // Set background to black
+                ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill entire canvas
             }
         }
     };
