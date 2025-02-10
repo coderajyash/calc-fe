@@ -273,7 +273,7 @@ export default function Home() {
 
             {latexExpression.length > 0 && (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="p-4 text-white text-xl font-bold bg-black bg-opacity-75 rounded shadow-md">
+        <div className="p-4 text-white font-bold bg-black bg-opacity-75 rounded shadow-md">
             <div className="latex-content">{latexExpression[latexExpression.length - 1]}</div>
         </div>
     </div>
