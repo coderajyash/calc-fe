@@ -70,7 +70,6 @@ export default function Home() {
     }, [reset]);
 
     useEffect(() => {
-        const canvas = canvasRef.current;
         
         const resizeCanvas = () => {
             const canvas = canvasRef.current;
