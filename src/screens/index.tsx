@@ -5,7 +5,6 @@ import axios from 'axios';
 import Draggable from 'react-draggable';
 import { SWATCHES } from '@/constants';
 
-
 interface GeneratedResult {
     expression: string;
     answer: string;
@@ -24,7 +23,10 @@ export default function Home() {
     const [reset, setReset] = useState(false);
     const [dictOfVars, setDictOfVars] = useState({});
     const [result, setResult] = useState<GeneratedResult>();
-    const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
+    const [latexPosition, setLatexPosition] = useState({ 
+        x: window.innerWidth / 2 - 50,  // Centers horizontally
+        y: window.innerHeight / 2 - 50  // Centers vertically
+    });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
 
 
@@ -192,9 +194,11 @@ export default function Home() {
             }
 
             const centerX = (minX + maxX) / 2;
-            const centerY = (minY + maxY) / 2;
-
-            setLatexPosition({ x: centerX, y: centerY });
+const centerY = (minY + maxY) / 2;
+setLatexPosition({ 
+    x: centerX - 50, // Offset to center better
+    y: centerY - 20  // Adjust vertical alignment
+});
             resp.data.forEach((data: Response) => {
                 setTimeout(() => {
                     setResult({
@@ -220,7 +224,7 @@ export default function Home() {
             </Card>
             
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-4 md:p-8 bg-black">
+            <div className="grid grid-cols-1 md:grid-cols-3 p-4 md:p-8 bg-black">
                 <Button
                     onClick={() => setReset(true)}
                     className="z-20 bg-black text-white w-full md:w-auto bg-blue-500 hover:bg-blue-600"
@@ -253,13 +257,13 @@ export default function Home() {
                     onMouseOut={stopDrawing}
                 />
             </div>
-    
+                    
             {latexExpression && latexExpression.map((latex, index) => (
                 <Draggable
-                    key={index}
-                    defaultPosition={latexPosition}
-                    onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
-                >
+                key={index}
+                defaultPosition={{ x: latexPosition.x, y: latexPosition.y }} 
+                onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
+            >
                     <div className="absolute max-w-[90%] md:max-w-[60%] p-2 text-white text-sm md:text-lg bg-black bg-opacity-75 rounded shadow-md">
                         <div className="latex-content">{latex}</div>
                     </div>
