@@ -257,7 +257,9 @@ setLatexPosition({
                     onMouseOut={stopDrawing}
                 />
             </div>
-                    
+            <div className='flex justify-center'>
+                <h1>Result</h1>
+            </div>
             {latexExpression && latexExpression.map((latex, index) => (
                 <Draggable
                 key={index}
