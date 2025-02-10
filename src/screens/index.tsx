@@ -98,7 +98,7 @@ export default function Home() {
 
     
     const renderLatexToCanvas = (expression: string, answer: string) => {
-        const latex = `\\(\\LARGE{${expression} = ${answer}}\\)`;
+        const latex = `\\(\\huge{${expression} = ${answer}}\\)`;
         setLatexExpression([...latexExpression, latex]);
 
         // Clear the main canvas
@@ -193,12 +193,8 @@ export default function Home() {
                 }
             }
 
-            const centerX = (minX + maxX) / 2;
-const centerY = (minY + maxY) / 2;
-setLatexPosition({ 
-    x: centerX - 50, // Offset to center better
-    y: centerY - 20  // Adjust vertical alignment
-});
+setLatexPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+
             resp.data.forEach((data: Response) => {
                 setTimeout(() => {
                     setResult({
@@ -261,16 +257,15 @@ setLatexPosition({
                 <h1 className='text-2xl font-bold text-black'>Result</h1>
             </div>
             {latexExpression && latexExpression.map((latex, index) => (
-                <Draggable
-                key={index}
-                defaultPosition={{ x: latexPosition.x, y: latexPosition.y }} 
-                onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
-            >
-                    <div className="absolute max-w-[90%] md:max-w-[60%] p-2 text-white text-sm md:text-lg bg-black bg-opacity-75 rounded shadow-md">
-                        <div className="latex-content">{latex}</div>
-                    </div>
-                </Draggable>
-            ))}
+    <div 
+        key={index}
+        className="absolute w-full text-center text-white text-xl font-bold"
+        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+    >
+        <div className="latex-content">{latex}</div>
+    </div>
+))}
+          
         </>
     );
     
