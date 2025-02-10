@@ -119,35 +119,55 @@ export default function Home() {
         }
     };
 
-    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
         const canvas = canvasRef.current;
         if (canvas) {
-            canvas.style.background = 'black';
             const ctx = canvas.getContext('2d');
             if (ctx) {
+                const { offsetX, offsetY } = getCanvasCoordinates(e);
                 ctx.beginPath();
-                ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                ctx.moveTo(offsetX, offsetY);
                 setIsDrawing(true);
             }
         }
     };
-    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!isDrawing) {
-            return;
+    const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return { offsetX: 0, offsetY: 0 };
+    
+        let offsetX: number, offsetY: number;
+    
+        if ("touches" in e) {
+            const rect = canvas.getBoundingClientRect();
+            offsetX = e.touches[0].clientX - rect.left;
+            offsetY = e.touches[0].clientY - rect.top;
+        } else {
+            offsetX = e.nativeEvent.offsetX;
+            offsetY = e.nativeEvent.offsetY;
         }
+    
+        return { offsetX, offsetY };
+    };
+    
+    const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+        if (!isDrawing) return;
+        e.preventDefault();
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
+                const { offsetX, offsetY } = getCanvasCoordinates(e);
                 ctx.strokeStyle = color;
-                ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                ctx.lineTo(offsetX, offsetY);
                 ctx.stroke();
             }
         }
     };
+    
     const stopDrawing = () => {
         setIsDrawing(false);
-    };  
+    };
 
     const runRoute = async () => {
         const canvas = canvasRef.current;
@@ -245,8 +265,12 @@ export default function Home() {
                     onMouseMove={draw}
                     onMouseUp={stopDrawing}
                     onMouseOut={stopDrawing}
+                    onTouchStart={startDrawing}
+                    onTouchMove={draw}
+                    onTouchEnd={stopDrawing}
                 />
             </div>
+
             {latexExpression.length > 0 && (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="p-4 text-white text-2xl font-bold bg-black bg-opacity-75 rounded shadow-md">
