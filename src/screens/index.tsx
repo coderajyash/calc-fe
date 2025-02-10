@@ -250,15 +250,13 @@ export default function Home() {
             <div className='flex justify-center'>
                 <h1 className='text-2xl font-bold text-black'>Result</h1>
             </div>
-            {latexExpression && latexExpression.map((latex, index) => (
-    <div 
-        key={index}
-        className="absolute w-full text-center text-white text-xl font-bold"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-    >
-        <div className="latex-content">{latex}</div>
+            {latexExpression.length > 0 && (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="p-4 text-white text-2xl font-bold bg-black bg-opacity-75 rounded shadow-md">
+            <div className="latex-content">{latexExpression[latexExpression.length - 1]}</div>
+        </div>
     </div>
-))}
+)}
           
         </>
     );
