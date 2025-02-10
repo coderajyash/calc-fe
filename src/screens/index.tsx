@@ -1,10 +1,10 @@
-import { ColorSwatch, Group } from '@mantine/core';
+import { ColorSwatch, Group, Card } from '@mantine/core';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import Draggable from 'react-draggable';
 import { SWATCHES } from '@/constants';
-// import {LazyBrush} from 'lazy-brush';
+
 
 interface GeneratedResult {
     expression: string;
@@ -26,12 +26,6 @@ export default function Home() {
     const [result, setResult] = useState<GeneratedResult>();
     const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
-
-    // const lazyBrush = new LazyBrush({
-    //     radius: 10,
-    //     enabled: true,
-    //     initialPoint: { x: 0, y: 0 },
-    // });
 
 
     useEffect(() => {
@@ -59,7 +53,7 @@ export default function Home() {
                 window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub]);
             }, 0);
         }
-    }, [latexExpression]); // Re-run when LaTeX expressions update
+    }, [latexExpression]); 
 
     useEffect(() => {
         if (result) {
@@ -77,35 +71,6 @@ export default function Home() {
         }
     }, [reset]);
 
-    // useEffect(() => {
-    //     const canvas = canvasRef.current;
-    
-    //     if (canvas) {
-    //         const ctx = canvas.getContext('2d');
-    //         if (ctx) {
-    //             canvas.width = window.innerWidth;
-    //             canvas.height = window.innerHeight - canvas.offsetTop;
-    //             ctx.lineCap = 'round';
-    //             ctx.lineWidth = 3;
-    //         }
-
-    //     }
-    //     const script = document.createElement('script');
-    //     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_CHTML';
-    //     script.async = true;
-    //     document.head.appendChild(script);
-
-    //     script.onload = () => {
-    //         window.MathJax.Hub.Config({
-    //             tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
-    //         });
-    //     };
-
-    //     return () => {
-    //         document.head.removeChild(script);
-    //     };
-
-    // }, []);
     useEffect(() => {
         const canvas = canvasRef.current;
         
@@ -123,7 +88,7 @@ export default function Home() {
             }
         };
     
-        resizeCanvas(); // Initial setup
+        resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
     
         return () => window.removeEventListener("resize", resizeCanvas);
@@ -203,7 +168,7 @@ export default function Home() {
             console.log('Response', resp);
             resp.data.forEach((data: Response) => {
                 if (data.assign === true) {
-                    // dict_of_vars[resp.result] = resp.answer;
+            
                     setDictOfVars({
                         ...dictOfVars,
                         [data.expr]: data.result
@@ -243,50 +208,64 @@ export default function Home() {
 
     return (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-4">
-    <Button
-        onClick={() => setReset(true)}
-        className="z-20 bg-black text-white w-full md:w-auto"
-    >
-        Reset
-    </Button>
+            <Card shadow="sm" padding="lg" className="w-full mb-4 text-white bg-black">
+                <h2 className="text-lg font-bold">How to Use the Application</h2>
+                <p>1. Draw a mathematical expression on the canvas using your mouse. You can also draw a and get output of the figure, eg drawing a right angled triangle with 2 sides length given it can calculate the hypotenuse</p>
+                <p>2. Click "Run" to process the equation.</p>
+                <p>3. The recognized LaTeX expression will appear on the screen, or the output will be presented</p>
+                <p>4. Click "Reset" to clear the canvas and start over.</p>
+                <div>
+                <h2 className='text-sm font-bold text-gray-400'>*The Website's Backend is hosted on Render's free service. First Request may take up to 60 seconds.</h2>
+            </div>
+            </Card>
+            
 
-    <Group className="z-20 flex-wrap justify-center">
-        {SWATCHES.map((swatch) => (
-            <ColorSwatch key={swatch} color={swatch} onClick={() => setColor(swatch)} />
-        ))}
-    </Group>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-4 md:p-8 bg-black">
+                <Button
+                    onClick={() => setReset(true)}
+                    className="z-20 bg-black text-white w-full md:w-auto bg-blue-500 hover:bg-blue-600"
+                >
+                    Reset
+                </Button>
+    
+                <Group className="z-20 flex-wrap justify-center bg-gray-400 border border-gray-200 rounded-md">
+                    {SWATCHES.map((swatch) => (
+                        <ColorSwatch key={swatch} color={swatch} onClick={() => setColor(swatch)} />
+                    ))}
+                </Group>
+    
+                <Button
+                    onClick={runRoute}
+                    className="z-20 bg-black text-white w-full md:w-auto bg-red-500 hover:bg-red-600"
+                >
+                    Run
+                </Button>
+            </div>
 
-    <Button
-        onClick={runRoute}
-        className="z-20 bg-black text-white w-full md:w-auto"
-    >
-        Run
-    </Button>
-</div>
-<canvas
-    ref={canvasRef}
-    id="canvas"
-    className="absolute inset-0 w-full h-screen"
-    onMouseDown={startDrawing}
-    onMouseMove={draw}
-    onMouseUp={stopDrawing}
-    onMouseOut={stopDrawing}
-/>
-
-
+            <div className="relative w-full h-[calc(100vh-150px)]">
+                <canvas
+                    ref={canvasRef}
+                    id="canvas"
+                    className="w-full h-full"
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseOut={stopDrawing}
+                />
+            </div>
+    
             {latexExpression && latexExpression.map((latex, index) => (
                 <Draggable
-                key={index}
-                defaultPosition={latexPosition}
-                onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
-            >
-                <div className="absolute max-w-[90%] md:max-w-[60%] p-2 text-white text-sm md:text-lg bg-black bg-opacity-75 rounded shadow-md">
-                    <div className="latex-content">{latex}</div>
-                </div>
-            </Draggable>
-            
+                    key={index}
+                    defaultPosition={latexPosition}
+                    onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
+                >
+                    <div className="absolute max-w-[90%] md:max-w-[60%] p-2 text-white text-sm md:text-lg bg-black bg-opacity-75 rounded shadow-md">
+                        <div className="latex-content">{latex}</div>
+                    </div>
+                </Draggable>
             ))}
         </>
     );
+    
 }
