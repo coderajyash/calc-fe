@@ -2,7 +2,6 @@ import { ColorSwatch, Group, Card } from '@mantine/core';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import Draggable from 'react-draggable';
 import { SWATCHES } from '@/constants';
 
 interface GeneratedResult {
@@ -23,10 +22,7 @@ export default function Home() {
     const [reset, setReset] = useState(false);
     const [dictOfVars, setDictOfVars] = useState({});
     const [result, setResult] = useState<GeneratedResult>();
-    const [latexPosition, setLatexPosition] = useState({ 
-        x: window.innerWidth / 2 - 50,  // Centers horizontally
-        y: window.innerHeight / 2 - 50  // Centers vertically
-    });
+
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
 
 
@@ -192,8 +188,6 @@ export default function Home() {
                     }
                 }
             }
-
-setLatexPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
             resp.data.forEach((data: Response) => {
                 setTimeout(() => {
