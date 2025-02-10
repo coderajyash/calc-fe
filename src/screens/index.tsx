@@ -247,9 +247,6 @@ export default function Home() {
                     onMouseOut={stopDrawing}
                 />
             </div>
-            <div className='flex justify-center'>
-                <h1 className='text-2xl font-bold text-black'>Result</h1>
-            </div>
             {latexExpression.length > 0 && (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="p-4 text-white text-2xl font-bold bg-black bg-opacity-75 rounded shadow-md">
