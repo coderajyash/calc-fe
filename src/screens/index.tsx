@@ -22,9 +22,8 @@ export default function Home() {
     const [reset, setReset] = useState(false);
     const [dictOfVars, setDictOfVars] = useState({});
     const [result, setResult] = useState<GeneratedResult>();
-
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
-
+    const [isLoading, setIsLoading] = useState(false); // New state for loading
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -43,7 +42,6 @@ export default function Home() {
             document.head.removeChild(script);
         };
     }, []);
-    
 
     useEffect(() => {
         if (window.MathJax) {
@@ -70,7 +68,6 @@ export default function Home() {
     }, [reset]);
 
     useEffect(() => {
-        
         const resizeCanvas = () => {
             const canvas = canvasRef.current;
             if (canvas) {
@@ -78,8 +75,8 @@ export default function Home() {
                 if (ctx) {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
-                    ctx.fillStyle = 'black'; // Set background color
-                    ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill entire canvas
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
             }
         };
@@ -90,12 +87,10 @@ export default function Home() {
         return () => window.removeEventListener("resize", resizeCanvas);
     }, []);
 
-    
     const renderLatexToCanvas = (expression: string, answer: string) => {
         const latex = `\\(\\huge{${expression} = ${answer}}\\)`;
         setLatexExpression([...latexExpression, latex]);
 
-        // Clear the main canvas
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
@@ -104,17 +99,15 @@ export default function Home() {
             }
         }
     };
-    
-
 
     const resetCanvas = () => {
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear content
-                ctx.fillStyle = 'black'; // Set background to black
-                ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill entire canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
         }
     };
@@ -132,6 +125,7 @@ export default function Home() {
             }
         }
     };
+
     const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (!canvas) return { offsetX: 0, offsetY: 0 };
@@ -149,7 +143,7 @@ export default function Home() {
     
         return { offsetX, offsetY };
     };
-    
+
     const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         if (!isDrawing) return;
         e.preventDefault();
@@ -164,7 +158,7 @@ export default function Home() {
             }
         }
     };
-    
+
     const stopDrawing = () => {
         setIsDrawing(false);
     };
@@ -173,50 +167,57 @@ export default function Home() {
         const canvas = canvasRef.current;
     
         if (canvas) {
-            const response = await axios({
-                method: 'post',
-                url: `${import.meta.env.VITE_API_URL}/calculate`,
-                data: {
-                    image: canvas.toDataURL('image/png'),
-                    dict_of_vars: dictOfVars
-                }
-            });
+            setIsLoading(true); // Start loading
+            try {
+                const response = await axios({
+                    method: 'post',
+                    url: `${import.meta.env.VITE_API_URL}/calculate`,
+                    data: {
+                        image: canvas.toDataURL('image/png'),
+                        dict_of_vars: dictOfVars
+                    }
+                });
 
-            const resp = await response.data;
-            console.log('Response', resp);
-            resp.data.forEach((data: Response) => {
-                if (data.assign === true) {
-            
-                    setDictOfVars({
-                        ...dictOfVars,
-                        [data.expr]: data.result
-                    });
-                }
-            });
-            const ctx = canvas.getContext('2d');
-            const imageData = ctx!.getImageData(0, 0, canvas.width, canvas.height);
-            let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+                const resp = await response.data;
+                console.log('Response', resp);
+                resp.data.forEach((data: Response) => {
+                    if (data.assign === true) {
+                        setDictOfVars({
+                            ...dictOfVars,
+                            [data.expr]: data.result
+                        });
+                    }
+                });
 
-            for (let y = 0; y < canvas.height; y++) {
-                for (let x = 0; x < canvas.width; x++) {
-                    const i = (y * canvas.width + x) * 4;
-                    if (imageData.data[i + 3] > 0) {  // If pixel is not transparent
-                        minX = Math.min(minX, x);
-                        minY = Math.min(minY, y);
-                        maxX = Math.max(maxX, x);
-                        maxY = Math.max(maxY, y);
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx!.getImageData(0, 0, canvas.width, canvas.height);
+                let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+
+                for (let y = 0; y < canvas.height; y++) {
+                    for (let x = 0; x < canvas.width; x++) {
+                        const i = (y * canvas.width + x) * 4;
+                        if (imageData.data[i + 3] > 0) {
+                            minX = Math.min(minX, x);
+                            minY = Math.min(minY, y);
+                            maxX = Math.max(maxX, x);
+                            maxY = Math.max(maxY, y);
+                        }
                     }
                 }
-            }
 
-            resp.data.forEach((data: Response) => {
-                setTimeout(() => {
-                    setResult({
-                        expression: data.expr,
-                        answer: data.result
-                    });
-                }, 1000);
-            });
+                resp.data.forEach((data: Response) => {
+                    setTimeout(() => {
+                        setResult({
+                            expression: data.expr,
+                            answer: data.result
+                        });
+                    }, 1000);
+                });
+            } catch (error) {
+                console.error('Error during request:', error);
+            } finally {
+                setIsLoading(false); // Stop loading
+            }
         }
     };
 
@@ -229,10 +230,9 @@ export default function Home() {
                 <p>3. The recognized LaTeX expression will appear on the screen, or the output will be presented</p>
                 <p>4. Click "Reset" to clear the canvas and start over.</p>
                 <div>
-                <h2 className='text-sm font-bold text-gray-400'>*The Website's Backend is hosted on Render's free service. First Request may take up to 60 seconds.</h2>
-            </div>
+                    <h2 className='text-sm font-bold text-gray-400'>*The Website's Backend is hosted on Render's free service. First Request may take up to 60 seconds.</h2>
+                </div>
             </Card>
-            
 
             <div className="grid grid-cols-1 md:grid-cols-3 p-4 md:p-8 bg-black">
                 <Button
@@ -251,8 +251,9 @@ export default function Home() {
                 <Button
                     onClick={runRoute}
                     className="z-20 bg-black text-white w-full md:w-auto bg-red-500 hover:bg-red-600"
+                    disabled={isLoading} // Disable button while loading
                 >
-                    Run
+                    {isLoading ? 'Loading...' : 'Run'}
                 </Button>
             </div>
 
@@ -269,17 +270,20 @@ export default function Home() {
                     onTouchMove={draw}
                     onTouchEnd={stopDrawing}
                 />
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75">
+                        <div className="text-white text-2xl font-bold">Loading...</div>
+                    </div>
+                )}
             </div>
 
             {latexExpression.length > 0 && (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="p-4 text-white font-bold bg-black bg-opacity-75 rounded shadow-md">
-            <div className="latex-content">{latexExpression[latexExpression.length - 1]}</div>
-        </div>
-    </div>
-)}
-          
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="p-4 text-white font-bold bg-black bg-opacity-75 rounded shadow-md">
+                        <div className="latex-content">{latexExpression[latexExpression.length - 1]}</div>
+                    </div>
+                </div>
+            )}
         </>
     );
-    
 }
