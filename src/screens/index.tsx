@@ -90,8 +90,7 @@ export default function Home() {
         return () => window.removeEventListener("resize", resizeCanvas);
     }, []);
 
-    const renderLatexToCanvas = (expression: string, answer: string) => {
-        // Only use the answer (result) for the LaTeX output
+    const renderLatexToCanvas = (_: string, answer: string) => {
         const latex = `\\(\\huge{${answer}}\\)`;
         setLatexExpression([...latexExpression, latex]);
 
